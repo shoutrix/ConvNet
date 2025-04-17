@@ -33,9 +33,7 @@ def parse_args():
     parser.add_argument('--learning_rate', type=float, default=0.0001)
     parser.add_argument('--weight_decay', type=float, default=0)
     parser.add_argument('--max_epoch', type=int, default=10)
-    
-    
-    
+
 
     return parser.parse_args()
 
@@ -54,7 +52,7 @@ if __name__ == "__main__":
                             entity=args.wandb_entity, 
                             name=f"trail_01",
                             config=vars(args))
-        
+
     else:
         logging = False
     trainer = Trainer(args, train_data_path, valid_data_path, test_data_path, logging=logging)
