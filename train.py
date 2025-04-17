@@ -26,9 +26,8 @@ def parse_args():
     parser.add_argument('--dropout_p', type=float, default=0.2)
     parser.add_argument('--conv_activation_function', type=str, default='GELU')
     parser.add_argument('--feedforward_activation_function', type=str, default='ReLU')
-    parser.add_argument('--maxpool_after_each_layer', type=bool, default=True)
     parser.add_argument('--num_channels_multiplier', type=float, default=1.0)
-    parser.add_argument('--apply_augmentations', type=bool, default=True)
+    parser.add_argument('--apply_augmentations', type=bool, default=False)
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--num_workers', type=int, default=16)
     parser.add_argument('--learning_rate', type=float, default=0.0001)
@@ -55,6 +54,7 @@ if __name__ == "__main__":
                             entity=args.wandb_entity, 
                             name=f"trail_01",
                             config=vars(args))
+        
     else:
         logging = False
     trainer = Trainer(args, train_data_path, valid_data_path, test_data_path, logging=logging)
