@@ -28,7 +28,6 @@ class ConvConfig:
     dropout_p: float = 0.2
     conv_activation_function: str = "ReLU"
     feedforward_activation_function: str = "ReLU"
-    maxpool_after_each_layer: bool = True
     num_channels_multiplier: float = 1.0
     
     def __post_init__(self):
