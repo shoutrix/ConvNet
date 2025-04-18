@@ -1,7 +1,0 @@
-{"time":"2025-04-18T01:00:47.114915048+05:30","level":"INFO","msg":"stream: starting","core version":"0.19.8","symlink path":"/speech/shoutrik/torch_exp/ConvNet/finetune/wandb/run-20250418_010047-m8frnvbf/logs/debug-core.log"}
-{"time":"2025-04-18T01:00:47.327935597+05:30","level":"INFO","msg":"created new stream","id":"m8frnvbf"}
-{"time":"2025-04-18T01:00:47.327970267+05:30","level":"INFO","msg":"stream: started","id":"m8frnvbf"}
-{"time":"2025-04-18T01:00:47.327999317+05:30","level":"INFO","msg":"handler: started","stream_id":"m8frnvbf"}
-{"time":"2025-04-18T01:00:47.328031087+05:30","level":"INFO","msg":"writer: Do: started","stream_id":"m8frnvbf"}
-{"time":"2025-04-18T01:00:47.328044536+05:30","level":"INFO","msg":"sender: started","stream_id":"m8frnvbf"}
-{"time":"2025-04-18T01:00:47.736927215+05:30","level":"INFO","msg":"Starting system monitor"}

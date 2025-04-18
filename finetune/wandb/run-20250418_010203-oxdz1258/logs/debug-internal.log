@@ -1,7 +1,0 @@
-{"time":"2025-04-18T01:02:03.846149793+05:30","level":"INFO","msg":"stream: starting","core version":"0.19.8","symlink path":"/speech/shoutrik/torch_exp/ConvNet/finetune/wandb/run-20250418_010203-oxdz1258/logs/debug-core.log"}
-{"time":"2025-04-18T01:02:04.057263461+05:30","level":"INFO","msg":"created new stream","id":"oxdz1258"}
-{"time":"2025-04-18T01:02:04.057301321+05:30","level":"INFO","msg":"stream: started","id":"oxdz1258"}
-{"time":"2025-04-18T01:02:04.057333961+05:30","level":"INFO","msg":"writer: Do: started","stream_id":"oxdz1258"}
-{"time":"2025-04-18T01:02:04.057343271+05:30","level":"INFO","msg":"handler: started","stream_id":"oxdz1258"}
-{"time":"2025-04-18T01:02:04.05746253+05:30","level":"INFO","msg":"sender: started","stream_id":"oxdz1258"}
-{"time":"2025-04-18T01:02:04.402075621+05:30","level":"INFO","msg":"Starting system monitor"}
