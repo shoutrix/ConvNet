@@ -1,0 +1,30 @@
+2025-04-18 00:13:40,189 INFO    MainThread:1140173 [wandb_setup.py:_flush():67] Current SDK version is 0.19.8
+2025-04-18 00:13:40,189 INFO    MainThread:1140173 [wandb_setup.py:_flush():67] Configure stats pid to 1140173
+2025-04-18 00:13:40,189 INFO    MainThread:1140173 [wandb_setup.py:_flush():67] Loading settings from /speech/shoutrik/.config/wandb/settings
+2025-04-18 00:13:40,189 INFO    MainThread:1140173 [wandb_setup.py:_flush():67] Loading settings from /speech/shoutrik/torch_exp/ConvNet/finetune/wandb/settings
+2025-04-18 00:13:40,189 INFO    MainThread:1140173 [wandb_setup.py:_flush():67] Loading settings from environment variables
+2025-04-18 00:13:40,189 INFO    MainThread:1140173 [wandb_init.py:setup_run_log_directory():647] Logging user logs to /speech/shoutrik/torch_exp/ConvNet/finetune/wandb/run-20250418_001340-t7b90fzl/logs/debug.log
+2025-04-18 00:13:40,189 INFO    MainThread:1140173 [wandb_init.py:setup_run_log_directory():648] Logging internal logs to /speech/shoutrik/torch_exp/ConvNet/finetune/wandb/run-20250418_001340-t7b90fzl/logs/debug-internal.log
+2025-04-18 00:13:40,189 INFO    MainThread:1140173 [wandb_init.py:init():761] calling init triggers
+2025-04-18 00:13:40,189 INFO    MainThread:1140173 [wandb_init.py:init():766] wandb.init called with sweep_config: {}
+config: {'wandb_project': 'ConvNet_expts', 'wandb_entity': 'shoutrik', 'run_name': 'Resnet50_classifier_and_last_block_finetune', 'train_data_path': '/speech/shoutrik/Database/INaturalist/inaturalist_12K/train', 'valid_data_path': '/speech/shoutrik/Database/INaturalist/inaturalist_12K/valid', 'test_data_path': '/speech/shoutrik/Database/INaturalist/inaturalist_12K/test', 'finetune_strategy': 1, 'input_channels': 3, 'num_channels': [32, 64, 128, 256, 512], 'num_layers': 5, 'kernel_size': [7, 5, 3, 3, 3], 'padding': [0, 0, 0, 0, 0], 'stride': [1, 1, 1, 1, 1], 'maxpool_kernel_size': 2, 'maxpool_padding': 0, 'maxpool_stride': 2, 'feedforward_dim': 1024, 'num_classes': 10, 'apply_maxpool': True, 'apply_batchnorm': True, 'input_size': 224, 'dropout_p': 0.3, 'conv_activation_function': 'GELU', 'feedforward_activation_function': 'ReLU', 'num_channels_multiplier': 1.0, 'apply_augmentations': True, 'batch_size': 128, 'num_workers': 16, 'learning_rate': 0.0001, 'weight_decay': 0.0001, 'max_epoch': 10, 'label_smoothing': 0.2, 'seed': 424, 'warmup_steps': 250, '_wandb': {}}
+2025-04-18 00:13:40,189 INFO    MainThread:1140173 [wandb_init.py:init():784] starting backend
+2025-04-18 00:13:40,189 INFO    MainThread:1140173 [wandb_init.py:init():788] sending inform_init request
+2025-04-18 00:13:40,216 INFO    MainThread:1140173 [backend.py:_multiprocessing_setup():101] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2025-04-18 00:13:40,216 INFO    MainThread:1140173 [wandb_init.py:init():798] backend started and connected
+2025-04-18 00:13:40,219 INFO    MainThread:1140173 [wandb_init.py:init():891] updated telemetry
+2025-04-18 00:13:40,250 INFO    MainThread:1140173 [wandb_init.py:init():915] communicating run to backend with 90.0 second timeout
+2025-04-18 00:13:40,833 INFO    MainThread:1140173 [wandb_init.py:init():990] starting run threads in backend
+2025-04-18 00:13:40,956 INFO    MainThread:1140173 [wandb_run.py:_console_start():2375] atexit reg
+2025-04-18 00:13:40,956 INFO    MainThread:1140173 [wandb_run.py:_redirect():2227] redirect: wrap_raw
+2025-04-18 00:13:40,956 INFO    MainThread:1140173 [wandb_run.py:_redirect():2292] Wrapping output streams.
+2025-04-18 00:13:40,956 INFO    MainThread:1140173 [wandb_run.py:_redirect():2315] Redirects installed.
+2025-04-18 00:13:40,958 INFO    MainThread:1140173 [wandb_init.py:init():1032] run started, returning control to user process
+2025-04-18 00:15:42,524 INFO    MainThread:1140173 [wandb_run.py:_config_callback():1261] config_cb ('_wandb', 'visualize', 'confusion_matrix') {'panel_type': 'Vega2', 'panel_config': {'panelDefId': 'wandb/confusion_matrix/v1', 'fieldSettings': {'Actual': 'Actual', 'Predicted': 'Predicted', 'nPredictions': 'nPredictions'}, 'stringSettings': {'title': 'Confusion Matrix Curve'}, 'transform': {'name': 'tableWithLeafColNames'}, 'userQuery': {'queryFields': [{'name': 'runSets', 'args': [{'name': 'runSets', 'value': '${runSets}'}], 'fields': [{'name': 'id', 'fields': []}, {'name': 'name', 'fields': []}, {'name': '_defaultColorIndex', 'fields': []}, {'name': 'summaryTable', 'args': [{'name': 'tableKey', 'value': 'confusion_matrix_table'}], 'fields': []}]}]}}} None
+2025-04-18 00:15:43,434 INFO    MainThread:1140173 [wandb_run.py:_finish():2112] finishing run shoutrik/ConvNet_expts/t7b90fzl
+2025-04-18 00:15:43,434 INFO    MainThread:1140173 [wandb_run.py:_atexit_cleanup():2340] got exitcode: 0
+2025-04-18 00:15:43,434 INFO    MainThread:1140173 [wandb_run.py:_restore():2322] restore
+2025-04-18 00:15:43,435 INFO    MainThread:1140173 [wandb_run.py:_restore():2328] restore done
+2025-04-18 00:15:46,120 INFO    MainThread:1140173 [wandb_run.py:_footer_history_summary_info():3956] rendering history
+2025-04-18 00:15:46,120 INFO    MainThread:1140173 [wandb_run.py:_footer_history_summary_info():3988] rendering summary
+2025-04-18 00:15:46,121 INFO    MainThread:1140173 [wandb_run.py:_footer_sync_info():3917] logging synced files

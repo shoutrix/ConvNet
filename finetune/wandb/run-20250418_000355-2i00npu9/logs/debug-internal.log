@@ -1,0 +1,16 @@
+{"time":"2025-04-18T00:03:55.749970234+05:30","level":"INFO","msg":"stream: starting","core version":"0.19.8","symlink path":"/speech/shoutrik/torch_exp/ConvNet/finetune/wandb/run-20250418_000355-2i00npu9/logs/debug-core.log"}
+{"time":"2025-04-18T00:03:55.970544714+05:30","level":"INFO","msg":"created new stream","id":"2i00npu9"}
+{"time":"2025-04-18T00:03:55.970607054+05:30","level":"INFO","msg":"stream: started","id":"2i00npu9"}
+{"time":"2025-04-18T00:03:55.970658133+05:30","level":"INFO","msg":"writer: Do: started","stream_id":"2i00npu9"}
+{"time":"2025-04-18T00:03:55.970658433+05:30","level":"INFO","msg":"handler: started","stream_id":"2i00npu9"}
+{"time":"2025-04-18T00:03:55.970715573+05:30","level":"INFO","msg":"sender: started","stream_id":"2i00npu9"}
+{"time":"2025-04-18T00:03:56.3364989+05:30","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-18T00:05:58.39423714+05:30","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-18T00:05:58.395170103+05:30","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-18T00:05:59.397091147+05:30","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading artifact run-2i00npu9-confusion_matrix_table","runtime_seconds":1.522329605},{"desc":"uploading config.yaml","runtime_seconds":0.409626844,"progress":"3.3KB/3.3KB"}],"total_operations":2}}
+{"time":"2025-04-18T00:06:00.533223774+05:30","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-18T00:06:00.845303418+05:30","level":"INFO","msg":"stream: closing","id":"2i00npu9"}
+{"time":"2025-04-18T00:06:00.845321548+05:30","level":"INFO","msg":"handler: closed","stream_id":"2i00npu9"}
+{"time":"2025-04-18T00:06:00.845330578+05:30","level":"INFO","msg":"writer: Close: closed","stream_id":"2i00npu9"}
+{"time":"2025-04-18T00:06:00.845337928+05:30","level":"INFO","msg":"sender: closed","stream_id":"2i00npu9"}
+{"time":"2025-04-18T00:06:00.845425407+05:30","level":"INFO","msg":"stream: closed","id":"2i00npu9"}
