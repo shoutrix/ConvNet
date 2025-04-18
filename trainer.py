@@ -11,15 +11,34 @@ import inspect
 from classifiers import ConvConfig, ConvolutionClassifier
 import wandb
 from torch.amp import autocast, GradScaler
+import random
+import numpy as np
 
+torch._dynamo.config.capture_scalar_outputs = True
 
 class ImageDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path, apply_augmentations=True):
+    """
+    A custom PyTorch Dataset for loading and optionally augmenting images 
+    from a directory using torchvision.datasets.ImageFolder.
+
+    Args:
+        data_path (str): Path to the root image directory, organized in subfolders per class.
+        apply_augmentations (bool): Whether to apply data augmentations. If True, 
+                                    returns both original and augmented versions of each image.
+
+    Attributes:
+        data (ImageFolder): Loaded dataset using ImageFolder.
+        original_transform (Compose): Transformation pipeline for original (non-augmented) images.
+        augmented_transform (Compose): Transformation pipeline with augmentations (if enabled).
+        apply_augmentations (bool): Flag to control if augmentations are used.
+    """
+    def __init__(self, data_path, input_size,apply_augmentations=True, mixup_p=0.2):
         super(ImageDataset, self).__init__()
         self.data = datasets.ImageFolder(data_path)
+        self.mixup_p = mixup_p
 
         self.original_transform = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize((input_size, input_size)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.5], std=[0.5])
         ])
@@ -36,46 +55,103 @@ class ImageDataset(torch.utils.data.Dataset):
         
         self.apply_augmentations = apply_augmentations
     
-    
     def __len__(self):
+        """
+        Returns the length of the dataset.
+
+        If augmentations are applied, returns twice the size of the original dataset
+        since both original and augmented versions are returned.
+        """
         if self.apply_augmentations:
             return len(self.data) * 2
         else:
             return len(self.data)
-    
+            
     def __getitem__(self, idx):
+        """
+        Retrieves an image and its label by index.
+
+        If augmentations are applied, returns either the original or augmented version 
+        based on index parity. Otherwise, returns only the original version.
+
+        Args:
+            idx (int): Index of the image.
+
+        Returns:
+            img (Tensor): Transformed image tensor.
+            label (int): Corresponding class label.
+        """
         if self.apply_augmentations:
-            true_idx = idx//2
-        
+            true_idx = idx // 2
             img, label = self.data[true_idx]
             
-            if idx%2 == 0:
+            if idx % 2 == 0:
                 img = self.original_transform(img)
             else:
                 img = self.augmented_transform(img)
         else:
             img, label = self.data[idx]
             img = self.original_transform(img)
+        
         return img, label
 
+
 class Trainer():
-    def __init__(self, args, train_data_path, valid_data_path, test_data_path, logging):
+    """
+    Trainer class to initialize datasets, dataloaders, model, optimizer, 
+    and mixed-precision configuration for image classification training.
+
+    Args:
+        args (Namespace): Command-line or script arguments containing all required hyperparameters and settings.
+        train_data_path (str): Path to the training data directory.
+        valid_data_path (str): Path to the validation data directory.
+        test_data_path (str): Path to the test data directory.
+        logging (Logger): Logger instance for logging messages.
+    """
+    def __init__(self, args, logging):
         self.args = args
         self.logging = logging
+        
+        self.set_seed(args.seed)
 
-        trainset = ImageDataset(train_data_path, apply_augmentations=args.apply_augmentations)
-        valset = ImageDataset(valid_data_path, apply_augmentations=False)
-        testset = ImageDataset(test_data_path, apply_augmentations=False)
+        trainset = ImageDataset(args.train_data_path, input_size=args.input_size, apply_augmentations=args.apply_augmentations)
+        valset = ImageDataset(args.valid_data_path, input_size=args.input_size, apply_augmentations=False)
+        testset = ImageDataset(args.test_data_path, input_size=args.input_size, apply_augmentations=False)
 
-        self.trainloader = DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True, persistent_workers=True)
-        self.valloader = DataLoader(valset, batch_size=args.batch_size*2, shuffle=False, num_workers=args.num_workers, pin_memory=True, persistent_workers=True)
-        self.testloader = DataLoader(testset, batch_size=args.batch_size*2, shuffle=False, num_workers=args.num_workers, pin_memory=True, persistent_workers=True)
+        self.trainloader = DataLoader(
+            trainset,
+            batch_size=args.batch_size,
+            shuffle=True,
+            num_workers=args.num_workers,
+            pin_memory=True,
+            persistent_workers=True
+        )
+
+        self.valloader = DataLoader(
+            valset,
+            batch_size=args.batch_size,
+            shuffle=False,
+            num_workers=args.num_workers,
+            pin_memory=True,
+            persistent_workers=True
+        )
+
+        self.testloader = DataLoader(
+            testset,
+            batch_size=args.batch_size,
+            shuffle=False,
+            num_workers=args.num_workers,
+            pin_memory=True,
+            persistent_workers=True
+        )
 
         class_to_idx = testset.data.class_to_idx
         self.labels = {v: k for k, v in class_to_idx.items()}
 
+        # Set device
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
+        # Build model configuration
         config = ConvConfig(
             input_channels=args.input_channels,
             num_channels=args.num_channels,
@@ -95,12 +171,21 @@ class Trainer():
             conv_activation_function=args.conv_activation_function,
             feedforward_activation_function=args.feedforward_activation_function,
             num_channels_multiplier=args.num_channels_multiplier,
+            label_smoothing=args.label_smoothing
         )
+
+        # Instantiate model
         self.model = ConvolutionClassifier(config).to(self.device)
         print(self.model)
 
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
+        # Optimizer setup
+        self.optimizer = torch.optim.Adam(
+            self.model.parameters(), 
+            lr=args.learning_rate, 
+            weight_decay=args.weight_decay
+        )
 
+        # Mixed precision configuration
         if torch.cuda.is_bf16_supported():
             self.autocast_dtype = torch.bfloat16
             self.bf16 = True
@@ -109,10 +194,25 @@ class Trainer():
             self.autocast_dtype = torch.float16
             self.bf16 = False
             self.scaler = GradScaler()
-        
+
         print(f"autocast dtype set to : {self.autocast_dtype}")
 
+
+    def set_seed(self, seed):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+
     def train(self):
+        """
+        Main training loop that runs for the specified number of epochs.
+        After training, it performs evaluation on the test set.
+        """
         print(f"Starting training on device: {self.device} | Batch size: {self.args.batch_size} | Train batches: {len(self.trainloader)} | Valid batches: {len(self.valloader)}")
         for epoch in range(self.args.max_epoch):
             self.run_one_epoch(epoch)
@@ -120,6 +220,14 @@ class Trainer():
         self.evaluate()
 
     def run_one_epoch(self, epoch):
+        """
+        Runs one full epoch including training and validation.
+
+        Args:
+            epoch (int): The current epoch number.
+
+        Logs training and validation metrics to wandb if logging is enabled.
+        """
         mean_train_loss, mean_train_acc = self.train_one_epoch()
         mean_val_loss, mean_val_acc = self.validate_one_epoch()
 
@@ -136,6 +244,13 @@ class Trainer():
             })
 
     def train_one_epoch(self):
+        """
+        Performs a single epoch of training.
+
+        Returns:
+            mean_train_loss (float): Accumulated training loss.
+            mean_train_acc (float): Accumulated training accuracy.
+        """
         self.model.train()
         mean_train_loss, mean_train_acc = 0, 0
 
@@ -162,6 +277,13 @@ class Trainer():
         return mean_train_loss, mean_train_acc
 
     def validate_one_epoch(self):
+        """
+        Performs a single epoch of validation.
+
+        Returns:
+            mean_val_loss (float): Accumulated validation loss.
+            mean_val_acc (float): Accumulated validation accuracy.
+        """
         self.model.eval()
         mean_val_loss, mean_val_acc = 0, 0
 
@@ -177,6 +299,13 @@ class Trainer():
         return mean_val_loss, mean_val_acc
 
     def evaluate(self):
+        """
+        Runs evaluation on the test set, calculates metrics, and optionally logs to wandb.
+
+        Logs:
+            - Test loss and accuracy.
+            - Confusion matrix via wandb if logging is enabled.
+        """
         self.model.eval()
         mean_test_loss, mean_test_acc = 0, 0
         targets, predictions = [], []
@@ -207,8 +336,8 @@ class Trainer():
                     probs=None,
                     y_true=targets,
                     preds=predictions,
-                    class_names=[self.labels[i] for i in range(len(self.labels))]
+                    class_names=self.labels
                 )
             })
 
-        print("Evaluation complete. Yaay !!! 🥳 ")
+        print("Evaluation complete. Yaay !!! 🥳")

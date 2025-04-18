@@ -8,7 +8,11 @@ def parse_args():
     
     parser.add_argument("-wp", "--wandb_project", type=str, required=False, help="WandB project name", default=None)
     parser.add_argument("-we", "--wandb_entity", type=str, required=False, help="WandB entity", default=None)
-
+    
+    parser.add_argumet("--train_data_path", type=str, required=True, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/train")
+    parser.add_argumet("--valid_data_path", type=str, required=True, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/valid")
+    parser.add_argumet("--test_data_path", type=str, required=True, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/test")
+    
     parser.add_argument('--input_channels', type=int, default=3)
     parser.add_argument('--num_channels', type=list, default=[32, 64, 128, 256, 512])
     parser.add_argument('--num_layers', type=int, default=5)
@@ -23,24 +27,21 @@ def parse_args():
     parser.add_argument('--apply_maxpool', type=bool, default=True)
     parser.add_argument('--apply_batchnorm', type=bool, default=True)
     parser.add_argument('--input_size', type=int, default=224)
-    parser.add_argument('--dropout_p', type=float, default=0.2)
+    parser.add_argument('--dropout_p', type=float, default=0.3)
     parser.add_argument('--conv_activation_function', type=str, default='GELU')
     parser.add_argument('--feedforward_activation_function', type=str, default='ReLU')
     parser.add_argument('--num_channels_multiplier', type=float, default=1.0)
-    parser.add_argument('--apply_augmentations', type=bool, default=False)
+    parser.add_argument('--apply_augmentations', type=bool, default=True)
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--num_workers', type=int, default=16)
     parser.add_argument('--learning_rate', type=float, default=0.0001)
-    parser.add_argument('--weight_decay', type=float, default=0)
+    parser.add_argument('--weight_decay', type=float, default=1e-4)
     parser.add_argument('--max_epoch', type=int, default=10)
+    parser.add_argument('--label_smoothing', type=float, default=0.2)
+    parser.add_argument('--seed', type=int, default=424)
 
 
     return parser.parse_args()
-
-
-train_data_path = "/speech/shoutrik/Database/INaturalist/inaturalist_12K/train"
-valid_data_path = "/speech/shoutrik/Database/INaturalist/inaturalist_12K/valid"
-test_data_path = "/speech/shoutrik/Database/INaturalist/inaturalist_12K/test"
 
 
 if __name__ == "__main__":
@@ -55,7 +56,7 @@ if __name__ == "__main__":
 
     else:
         logging = False
-    trainer = Trainer(args, train_data_path, valid_data_path, test_data_path, logging=logging)
+    trainer = Trainer(args, logging=logging)
     trainer.train()
     if logging:
         wandb.finish()
