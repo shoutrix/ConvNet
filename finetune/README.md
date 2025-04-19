@@ -26,6 +26,18 @@ inaturalist_12K/
 
 ---
 
+## 🎯 Finetuning Strategies
+
+Both models support **three fine-tuning strategies** via the `--finetune_strategy` argument:
+
+- `0`: Finetune **only the classifier head**
+- `1`: Finetune the **classifier head and the last layer**
+- `2`: Finetune **only the classifier head for a few epochs**, then **unfreeze the full model** for end-to-end training
+
+🔧 **Note**:  
+The final classifier head is always initialized **randomly** and trained from scratch.
+
+
 ## Finetuning resnet50
 
 Use the following command to start training:
@@ -66,5 +78,4 @@ python vision_transformer.py \
 ```
 
 resnet50 suppports the following pretrained weights: IMAGENET1K_V1, IMAGENET1K_SWAG_E2E_V1, IMAGENET1K_SWAG_LINEAR_V1
-
 ---
