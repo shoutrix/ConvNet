@@ -12,9 +12,11 @@ import wandb
 from torch.amp import autocast, GradScaler
 import random
 import numpy as np
-from torchvision.models import resnet50, ResNet50_Weights
 import argparse
 from torch.optim.lr_scheduler import SequentialLR, LinearLR, ExponentialLR
+from torchvision.models import vit_b_16, ViT_B_16_Weights
+from torchvision.transforms.functional import InterpolationMode
+
 
 
 def parse_args():
@@ -28,35 +30,21 @@ def parse_args():
     parser.add_argument("--valid_data_path", type=str, required=False, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/valid")
     parser.add_argument("--test_data_path", type=str, required=False, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/test")
     
-    parser.add_argument("--finetune_strategy", type=int, required=False, choices=[0, 1, 2], default=2)
+    parser.add_argument("--finetune_strategy", type=int, required=False, choices=[0, 1, 2], default=0)
 
-    parser.add_argument('--input_channels', type=int, default=3)
-    parser.add_argument('--num_channels', type=list, default=[32, 64, 128, 256, 512])
-    parser.add_argument('--num_layers', type=int, default=5)
-    parser.add_argument('--kernel_size', type=list, default=[7, 5, 3, 3, 3])
-    parser.add_argument('--padding', type=list, default=[0, 0, 0, 0, 0])
-    parser.add_argument('--stride', type=list, default=[1, 1, 1, 1, 1])
-    parser.add_argument('--maxpool_kernel_size', type=int, default=2)
-    parser.add_argument('--maxpool_padding', type=int, default=0)
-    parser.add_argument('--maxpool_stride', type=int, default=2)
-    parser.add_argument('--feedforward_dim', type=int, default=1024)
+    parser.add_argument('--feedforward_dim', type=int, default=512)
     parser.add_argument('--num_classes', type=int, default=10)
-    parser.add_argument('--apply_maxpool', type=bool, default=True)
-    parser.add_argument('--apply_batchnorm', type=bool, default=True)
     parser.add_argument('--input_size', type=int, default=224)
-    parser.add_argument('--dropout_p', type=float, default=0.3)
-    parser.add_argument('--conv_activation_function', type=str, default='GELU')
-    parser.add_argument('--feedforward_activation_function', type=str, default='ReLU')
-    parser.add_argument('--num_channels_multiplier', type=float, default=1.0)
+    parser.add_argument('--dropout_p', type=float, default=0.2)
     parser.add_argument('--apply_augmentations', type=bool, default=True)
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--num_workers', type=int, default=16)
     parser.add_argument('--learning_rate', type=float, default=0.0001)
     parser.add_argument('--weight_decay', type=float, default=1e-4)
     parser.add_argument('--max_epoch', type=int, default=10)
-    parser.add_argument('--label_smoothing', type=float, default=0.2)
+    parser.add_argument('--label_smoothing', type=float, default=0.1)
     parser.add_argument('--seed', type=int, default=424)
-    parser.add_argument('--warmup_steps', type=int, default=250)
+    parser.add_argument('--warmup_steps', type=int, default=400)
 
 
     return parser.parse_args()
@@ -80,7 +68,7 @@ class ImageDataset(torch.utils.data.Dataset):
         augmented_transform (Compose): Transformation pipeline with augmentations (if enabled).
         apply_augmentations (bool): Flag to control if augmentations are used.
     """
-    def __init__(self, data_path, apply_augmentations=True, mixup_p=0.2, weights=None):
+    def __init__(self, data_path, apply_augmentations=True, weights=None, mixup_p=0.2):
         super(ImageDataset, self).__init__()
         self.data = datasets.ImageFolder(data_path)
         self.mixup_p = mixup_p
@@ -101,6 +89,8 @@ class ImageDataset(torch.utils.data.Dataset):
                 transforms.ToTensor(),
                 transforms.Normalize(mean=weights.transforms().mean, std=weights.transforms().std)
             ])
+
+        
         self.apply_augmentations = apply_augmentations
     
     def __len__(self):
@@ -160,9 +150,10 @@ class Trainer():
         self.args = args
         self.logging = logging
         
-        self.set_seed(args.seed)
+        self.set_seed(args.seed)  
         
-        weights = ResNet50_Weights.IMAGENET1K_V2
+        weights = ViT_B_16_Weights.IMAGENET1K_SWAG_E2E_V1
+        print("aaaa : ", weights.transforms())
 
         trainset = ImageDataset(args.train_data_path, apply_augmentations=args.apply_augmentations, weights=weights)
         valset = ImageDataset(args.valid_data_path, apply_augmentations=False, weights=weights)
@@ -202,9 +193,10 @@ class Trainer():
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # Instantiate model
-        model = resnet50(weights=weights)              
-        final_layer_size = model.fc.in_features
-        model.fc = nn.Sequential(
+        model = vit_b_16(weights=weights) 
+        
+        final_layer_size = model.heads.head.in_features
+        model.heads.head = nn.Sequential(
             nn.Linear(final_layer_size, args.feedforward_dim),
             nn.ReLU(inplace=True),
             nn.Dropout(args.dropout_p),
@@ -218,26 +210,24 @@ class Trainer():
         # train only the classifier head
         if args.finetune_strategy==0:
             print("Training only the classifier head")
-            for param in model.fc.parameters():
+            for param in model.heads.head.parameters():
                 param.requires_grad = True
                 
         # train the last block and the classifier head
         if args.finetune_strategy==1:
             print("Training only the classifier head and the final block")
-            for param in model.fc.parameters():
+            for param in model.heads.head.parameters():
                 param.requires_grad = True
-            for param in model.layer4.parameters():
+            for param in model.encoder.layers.encoder_layer_11.parameters():
                 param.requires_grad = True
                 
         # Sequential training of first classifier then full model
         if args.finetune_strategy==2:
-            for param in model.fc.parameters():
+            for param in model.heads.head.parameters():
                 param.requires_grad = True
             self.unfreeze_full_model_epoch = 4
             print(f"Training only the classifier head initialy, full model will be trained after epoch : {self.unfreeze_full_model_epoch}")
-                
-        
-        
+                        
         self.model = model.to(self.device)
         # self.model = torch.compile(self.model)
         print(self.model)
