@@ -31,6 +31,8 @@ def parse_args():
     parser.add_argument("--test_data_path", type=str, required=False, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/test")
     
     parser.add_argument("--finetune_strategy", type=int, required=False, choices=[0, 1, 2], default=0)
+    parser.add_argument("--weights", type=str, required=False, choices=["IMAGENET1K_V1", "IMAGENET1K_SWAG_E2E_V1", "IMAGENET1K_SWAG_LINEAR_V1"], default="IMAGENET1K_SWAG_E2E_V1")
+    
 
     parser.add_argument('--feedforward_dim', type=int, default=512)
     parser.add_argument('--num_classes', type=int, default=10)
