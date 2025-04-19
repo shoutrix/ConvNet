@@ -9,13 +9,13 @@ def parse_args():
     parser.add_argument("-wp", "--wandb_project", type=str, required=False, help="WandB project name", default=None)
     parser.add_argument("-we", "--wandb_entity", type=str, required=False, help="WandB entity", default=None)
     
-    parser.add_argumet("--train_data_path", type=str, required=True, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/train")
-    parser.add_argumet("--valid_data_path", type=str, required=True, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/valid")
-    parser.add_argumet("--test_data_path", type=str, required=True, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/test")
+    parser.add_argument("--train_data_path", type=str, required=False, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/train")
+    parser.add_argument("--valid_data_path", type=str, required=False, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/valid")
+    parser.add_argument("--test_data_path", type=str, required=False, default="/speech/shoutrik/Database/INaturalist/inaturalist_12K/test")
     
     parser.add_argument('--input_channels', type=int, default=3)
-    parser.add_argument('--num_channels', type=list, default=[32, 64, 128, 256, 512])
     parser.add_argument('--num_layers', type=int, default=5)
+    parser.add_argument('--num_channels', type=list, default=[32, 64, 128, 256, 512])
     parser.add_argument('--kernel_size', type=list, default=[7, 5, 3, 3, 3])
     parser.add_argument('--padding', type=list, default=[0, 0, 0, 0, 0])
     parser.add_argument('--stride', type=list, default=[1, 1, 1, 1, 1])
