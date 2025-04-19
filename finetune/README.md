@@ -77,5 +77,4 @@ python vision_transformer.py \
   --weights IMAGENET1K_SWAG_E2E_V1 \
 ```
 
-resnet50 suppports the following pretrained weights: IMAGENET1K_V1, IMAGENET1K_SWAG_E2E_V1, IMAGENET1K_SWAG_LINEAR_V1
----
+Vision Transformer vit_b_16 suppports the following pretrained weights: IMAGENET1K_V1, IMAGENET1K_SWAG_E2E_V1, IMAGENET1K_SWAG_LINEAR_V1
