@@ -4,7 +4,7 @@ import torchvision
 from torchvision import datasets, transforms
 from dataclasses import dataclass
 import torch.nn as nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 import torch.nn.functional as F
 from typing import List, Union
 import inspect
@@ -13,8 +13,11 @@ import wandb
 from torch.amp import autocast, GradScaler
 import random
 import numpy as np
+from matplotlib import pyplot as plt
+import random
 
-torch._dynamo.config.capture_scalar_outputs = True
+
+# torch._dynamo.config.capture_scalar_outputs = True
 
 class ImageDataset(torch.utils.data.Dataset):
     """
@@ -144,6 +147,7 @@ class Trainer():
             pin_memory=True,
             persistent_workers=True
         )
+        
 
         class_to_idx = testset.data.class_to_idx
         self.labels = {v: k for k, v in class_to_idx.items()}
@@ -177,6 +181,9 @@ class Trainer():
         # Instantiate model
         self.model = ConvolutionClassifier(config).to(self.device)
         print(self.model)
+        
+        n_params = sum([param.numel() for param in self.model.parameters()])
+        print(f"Number of Parameters : {n_params}")
 
         # Optimizer setup
         self.optimizer = torch.optim.Adam(
@@ -218,6 +225,8 @@ class Trainer():
             self.run_one_epoch(epoch)
         print("Finished Training!\nStarting Evaluation on Test Set...")
         self.evaluate()
+        if self.args.visualize_error:
+            self.visualize_samples()
 
     def run_one_epoch(self, epoch):
         """
@@ -341,3 +350,54 @@ class Trainer():
             })
 
         print("Evaluation complete. Yaay !!! 🥳")
+        
+        
+    def visualize_samples(self):
+
+        dataset = self.testloader.dataset
+        random_idx = random.sample(range(len(dataset)), 30)
+        subset = Subset(dataset, random_idx)
+        
+        images, labels = zip(*[subset[i] for i in range(len(subset))])
+
+        x = torch.stack(images)
+        y = torch.tensor(labels)
+
+        print(y)
+        x = x.to(self.device, non_blocking=True)
+        y = y.to(self.device, non_blocking=True)
+        with torch.no_grad():
+            _, _, preds = self.model(x, y)
+            
+        print(preds)
+        
+        x_images = x.detach().cpu()
+        y_preds = preds.detach().cpu().numpy()
+        y_target = y.detach().cpu().numpy()
+        
+        mean = 0.5
+        std = 0.5
+        x_images = (x_images * std) + mean
+        x_images = x_images.permute(0, 2, 3, 1)
+        
+        fig, axes = plt.subplots(10, 3, figsize=(9, 30))
+        axes = axes.flatten()
+
+        for i in range(30):
+            axes[i].imshow(x_images[i])
+            axes[i].set_title(f"Pred: {self.labels[y_preds[i]]} | Target: {self.labels[y_target[i]]}", fontsize=10)
+            axes[i].axis("off")
+
+        plt.tight_layout()
+        plt.savefig("samples.png")
+        if self.logging:
+            image_ = wandb.Image(
+                data_or_path = "samples.png",
+                mode = "RGB",
+                caption = "Top 30 Predictions vs Targets"
+            )
+            wandb.log({"Sample predictions": image_})
+        plt.close(fig)
+                
+    
+
