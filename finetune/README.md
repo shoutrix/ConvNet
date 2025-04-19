@@ -44,9 +44,9 @@ python resnet50.py \
   --weights IMAGENET1K_V2 \
 ```
 
-resnet50 suppports the following pretrained weights:
-IMAGENET1K_V1
-IMAGENET1K_V2
+resnet50 suppports the following pretrained weights:/
+IMAGENET1K_V1/
+IMAGENET1K_V2/
 
 
 ## Finetuning vision transformer vit_b_16
@@ -67,9 +67,9 @@ python vision_transformer.py \
   --weights IMAGENET1K_SWAG_E2E_V1 \
 ```
 
-resnet50 suppports the following pretrained weights:
-IMAGENET1K_V1
-IMAGENET1K_SWAG_E2E_V1
-IMAGENET1K_SWAG_LINEAR_V1
+resnet50 suppports the following pretrained weights:/
+IMAGENET1K_V1/
+IMAGENET1K_SWAG_E2E_V1/
+IMAGENET1K_SWAG_LINEAR_V1/
 
 ---
