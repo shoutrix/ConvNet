@@ -163,6 +163,11 @@ class Trainer():
         self.set_seed(args.seed)
         
         weights = ResNet50_Weights.IMAGENET1K_V2
+        try:
+            weights = getattr(ResNet50_Weights, args.weights)
+        except AttributeError:
+            raise ValueError(f"Invalid weights '{args.weights}'. Valid options are: "
+                             "IMAGENET1K_V2, IMAGENET1K_V1.")
 
         trainset = ImageDataset(args.train_data_path, apply_augmentations=args.apply_augmentations, weights=weights)
         valset = ImageDataset(args.valid_data_path, apply_augmentations=False, weights=weights)

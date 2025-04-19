@@ -152,8 +152,14 @@ class Trainer():
         
         self.set_seed(args.seed)  
         
-        weights = ViT_B_16_Weights.IMAGENET1K_SWAG_E2E_V1
-        print("aaaa : ", weights.transforms())
+        try:
+            weights = getattr(ViT_B_16_Weights, args.weights)
+        except AttributeError:
+            raise ValueError(f"Invalid weights '{args.weights}'. Valid options are: "
+                             "IMAGENET1K_V1, IMAGENET1K_SWAG_E2E_V1, IMAGENET1K_SWAG_LINEAR_V1.")
+
+        # self.weights = weights
+        # print("aaaa : ", weights.transforms())
 
         trainset = ImageDataset(args.train_data_path, apply_augmentations=args.apply_augmentations, weights=weights)
         valset = ImageDataset(args.valid_data_path, apply_augmentations=False, weights=weights)
